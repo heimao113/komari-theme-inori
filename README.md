@@ -11,10 +11,14 @@ It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI**
 
 > This repository contains only the frontend. You will need a running Komari backend instance for the UI to talk to. Or you can download the theme file and upload it through Komari's admin dashboard, this would be the recommanded way.
 
+![preview](https://github.com/tonyliuzj/komari-next/blob/main/preview.png?raw=true)
 ![dark-theme](https://github.com/tonyliuzj/komari-next/blob/main/images/dark-theme.png?raw=true)
 
 ## Features
 
+- Map! Map! Map!
+- Able to set settings in admin panel
+- Remaining Value Calculator
 - Real‑time dashboard for server and node status
 - Instance detail pages with load and latency charts
 - Node list and management views
@@ -116,6 +120,10 @@ This repository is designed to be used as a custom Komari theme.
 
 Contributions are welcome.  
 If you find issues or have ideas for improvements, feel free to open an issue or submit a pull request.
+
+## Thanks
+[piphase/komari-nexus](https://github.com/piphase/komari-nexus)
+[fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
 
 ## Star History
 
