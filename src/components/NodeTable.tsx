@@ -162,7 +162,7 @@ const NodeTable: React.FC<NodeTableProps> = ({ nodes, liveData }) => {
   const tableColumnCount = showPriceColumn ? 10 : 9;
 
   return (
-    <div className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+    <div data-card-blur-surface="true" className="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <Table className={cn("w-full table-fixed", showPriceColumn ? "min-w-[1240px]" : "min-w-[1084px]")}>
           <TableHeader>
@@ -474,10 +474,10 @@ interface ExpandedNodeDetailsProps {
 const ExpandedNodeDetails: React.FC<ExpandedNodeDetailsProps> = ({ node }) => {
   return (
     <div className="flex w-full min-w-0 max-w-full flex-col gap-6 overflow-hidden">
-      <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div data-card-blur-surface="true" className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
         <DetailsGrid uuid={node.uuid} />
       </div>
-      <div className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div data-card-blur-surface="true" className="min-w-0 max-w-full overflow-hidden rounded-lg border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
         <MiniPingChart hours={24} uuid={node.uuid} />
       </div>
     </div>

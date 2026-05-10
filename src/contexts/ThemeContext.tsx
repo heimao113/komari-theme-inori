@@ -18,6 +18,8 @@ export type CardDesign = "default" | "quality-bars";
 export type StatusDesign = "default" | "speed";
 export type GraphDesign = "circle" | "progress" | "bar" | "minimal";
 export type NodeViewMode = "grid" | "table";
+export type BackgroundBlurType = "soft" | "glass";
+export type CardBlurType = BackgroundBlurType;
 
 export interface ThemeConfig {
   colorTheme: ColorTheme;
@@ -26,6 +28,14 @@ export interface ThemeConfig {
   statusDesign: StatusDesign;
   graphDesign: GraphDesign;
   backgroundImageUrl?: string;
+  backgroundBlurEnabled: boolean;
+  backgroundBlurType: BackgroundBlurType;
+  backgroundBlurIntensity: number;
+  cardBlurEnabled: boolean;
+  cardBlurType: CardBlurType;
+  // Persisted key kept for compatibility; this now drives card transparency.
+  cardBlurIntensity: number;
+  cardExtraBlurIntensity: number;
 }
 
 export type StatusCardsVisibility = {
@@ -54,6 +64,14 @@ interface ThemeContextType {
   setStatusDesign: (design: StatusDesign) => void;
   setGraphDesign: (design: GraphDesign) => void;
   setBackgroundImageUrl: (url: string) => void;
+  setBackgroundBlurEnabled: (enabled: boolean) => void;
+  setBackgroundBlurType: (type: BackgroundBlurType) => void;
+  setBackgroundBlurIntensity: (intensity: number) => void;
+  setCardBlurEnabled: (enabled: boolean) => void;
+  setCardBlurType: (type: CardBlurType) => void;
+  setCardTransparentIntensity: (intensity: number) => void;
+  setCardBlurIntensity: (intensity: number) => void;
+  setCardExtraBlurIntensity: (intensity: number) => void;
   setStatusCardVisibility: (key: keyof StatusCardsVisibility, checked: boolean) => void;
   setNodeViewMode: (value: NodeViewMode) => void;
 }
@@ -74,6 +92,29 @@ const CARD_DESIGNS: CardDesign[] = ["default", "quality-bars"];
 const STATUS_DESIGNS: StatusDesign[] = ["default", "speed"];
 const GRAPH_DESIGNS: GraphDesign[] = ["circle", "progress", "bar", "minimal"];
 const NODE_VIEW_MODES: NodeViewMode[] = ["grid", "table"];
+const BACKGROUND_BLUR_TYPES: BackgroundBlurType[] = ["soft", "glass"];
+const CARD_BLUR_STYLE_PROPERTIES = {
+  filter: "--komari-card-backdrop-filter",
+  backgroundAlpha: "--komari-card-background-alpha",
+  borderAlpha: "--komari-card-border-alpha",
+  glassStartAlpha: "--komari-card-glass-start-alpha",
+  glassMiddleAlpha: "--komari-card-glass-middle-alpha",
+  glassEndAlpha: "--komari-card-glass-end-alpha",
+  glassHighlightMix: "--komari-card-glass-highlight-mix",
+  glassDarkHighlightMix: "--komari-card-glass-dark-highlight-mix",
+  glassBorderWhiteMix: "--komari-card-glass-border-white-mix",
+  glassDarkBorderWhiteMix: "--komari-card-glass-dark-border-white-mix",
+  glassOutlineAlpha: "--komari-card-glass-outline-alpha",
+  glassDarkOutlineAlpha: "--komari-card-glass-dark-outline-alpha",
+  glassShadowAlpha: "--komari-card-glass-shadow-alpha",
+  glassSecondaryShadowAlpha: "--komari-card-glass-secondary-shadow-alpha",
+  glassDarkShadowAlpha: "--komari-card-glass-dark-shadow-alpha",
+  glassDarkSecondaryShadowAlpha: "--komari-card-glass-dark-secondary-shadow-alpha",
+  glassInnerHighlightAlpha: "--komari-card-glass-inner-highlight-alpha",
+  glassDarkInnerHighlightAlpha: "--komari-card-glass-dark-inner-highlight-alpha",
+  glassInnerLowlightAlpha: "--komari-card-glass-inner-lowlight-alpha",
+  glassDarkInnerLowlightAlpha: "--komari-card-glass-dark-inner-lowlight-alpha",
+} as const;
 
 const DEFAULT_THEME_CONFIG: ThemeConfig = {
   colorTheme: "default",
@@ -82,6 +123,13 @@ const DEFAULT_THEME_CONFIG: ThemeConfig = {
   statusDesign: "default",
   graphDesign: "circle",
   backgroundImageUrl: "",
+  backgroundBlurEnabled: false,
+  backgroundBlurType: "soft",
+  backgroundBlurIntensity: 35,
+  cardBlurEnabled: false,
+  cardBlurType: "glass",
+  cardBlurIntensity: 35,
+  cardExtraBlurIntensity: 35,
 };
 
 export const DEFAULT_STATUS_CARDS_VISIBILITY: StatusCardsVisibility = {
@@ -192,6 +240,145 @@ function pickBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
 
+function pickBlurType(value: unknown): BackgroundBlurType | undefined {
+  return pickEnum(value, BACKGROUND_BLUR_TYPES);
+}
+
+function pickNumber(value: unknown): number | undefined {
+  const numberValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim() !== ""
+        ? Number(value)
+        : NaN;
+
+  return Number.isFinite(numberValue) ? numberValue : undefined;
+}
+
+function clampBackgroundBlurIntensity(value: number): number {
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
+function cssPercent(value: number): string {
+  return `${Math.round(value)}%`;
+}
+
+function cssAlpha(value: number): string {
+  return Number(value.toFixed(3)).toString();
+}
+
+function cssString(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, "\\\"")
+    .replace(/\n/g, "\\A ")
+    .replace(/\r/g, "\\D ")
+    .replace(/\f/g, "\\C ");
+}
+
+function getBackgroundBlurPresentation(
+  type: BackgroundBlurType,
+  intensity: number,
+  enabled: boolean
+) {
+  if (!enabled || intensity <= 0) {
+    return {
+      filter: "none",
+      bleed: "0px",
+    };
+  }
+
+  const normalized = clampBackgroundBlurIntensity(intensity);
+  const blur = (multiplier: number) => Number((normalized * multiplier).toFixed(1));
+  const amount = normalized / 100;
+
+  const filterByType: Record<BackgroundBlurType, string> = {
+    soft: `blur(${blur(0.1)}px) saturate(${(1 + amount * 0.04).toFixed(2)})`,
+    glass: `blur(${blur(0.42)}px) saturate(${(1 + amount * 1.1).toFixed(2)}) brightness(${(1 + amount * 0.12).toFixed(2)}) contrast(${(1 - amount * 0.1).toFixed(2)})`,
+  };
+
+  return {
+    filter: filterByType[type],
+    bleed: `${Math.ceil(normalized * 0.28)}px`,
+  };
+}
+
+function getCardBlurPresentation(
+  type: CardBlurType,
+  transparentIntensity: number,
+  extraBlurIntensity: number,
+  enabled: boolean
+) {
+  if (!enabled) {
+    return {
+      filter: "none",
+      backgroundAlpha: "100%",
+      borderAlpha: "100%",
+      glassStartAlpha: "100%",
+      glassMiddleAlpha: "100%",
+      glassEndAlpha: "100%",
+      glassHighlightMix: "0%",
+      glassDarkHighlightMix: "0%",
+      glassBorderWhiteMix: "0%",
+      glassDarkBorderWhiteMix: "0%",
+      glassOutlineAlpha: "0",
+      glassDarkOutlineAlpha: "0",
+      glassShadowAlpha: "0",
+      glassSecondaryShadowAlpha: "0",
+      glassDarkShadowAlpha: "0",
+      glassDarkSecondaryShadowAlpha: "0",
+      glassInnerHighlightAlpha: "0",
+      glassDarkInnerHighlightAlpha: "0",
+      glassInnerLowlightAlpha: "0",
+      glassDarkInnerLowlightAlpha: "0",
+    };
+  }
+
+  const transparentNormalized = clampBackgroundBlurIntensity(transparentIntensity);
+  const extraBlurNormalized = clampBackgroundBlurIntensity(extraBlurIntensity);
+  const blur = (multiplier: number) => Number((extraBlurNormalized * multiplier).toFixed(1));
+  const transparentAmount = transparentNormalized / 100;
+  const extraBlurAmount = extraBlurNormalized / 100;
+
+  const filterByType: Record<CardBlurType, string> = {
+    soft: `blur(${blur(0.08)}px) saturate(${(1 + extraBlurAmount * 0.06).toFixed(2)})`,
+    glass: `blur(${blur(0.42)}px) saturate(${(1 + extraBlurAmount * 1.15).toFixed(2)}) brightness(${(1 + extraBlurAmount * 0.12).toFixed(2)}) contrast(${(1 - extraBlurAmount * 0.1).toFixed(2)})`,
+  };
+
+  const backgroundAlphaByType: Record<CardBlurType, number> = {
+    soft: 100 - transparentAmount * 100,
+    glass: 72 - transparentAmount * 36,
+  };
+
+  const borderAlphaByType: Record<CardBlurType, number> = {
+    soft: 90 - transparentAmount * 60,
+    glass: 80 + transparentAmount * 20,
+  };
+
+  return {
+    filter: extraBlurNormalized > 0 ? filterByType[type] : "none",
+    backgroundAlpha: `${Math.round(backgroundAlphaByType[type])}%`,
+    borderAlpha: `${Math.round(borderAlphaByType[type])}%`,
+    glassStartAlpha: cssPercent(72 - transparentAmount * 36),
+    glassMiddleAlpha: cssPercent(46 - transparentAmount * 26),
+    glassEndAlpha: cssPercent(34 - transparentAmount * 22),
+    glassHighlightMix: cssPercent(8 + extraBlurAmount * 22),
+    glassDarkHighlightMix: cssPercent(5 + extraBlurAmount * 14),
+    glassBorderWhiteMix: cssPercent(28 + extraBlurAmount * 42),
+    glassDarkBorderWhiteMix: cssPercent(14 + extraBlurAmount * 24),
+    glassOutlineAlpha: cssAlpha(0.14 + extraBlurAmount * 0.28),
+    glassDarkOutlineAlpha: cssAlpha(0.08 + extraBlurAmount * 0.18),
+    glassShadowAlpha: cssAlpha(0.08 + extraBlurAmount * 0.2),
+    glassSecondaryShadowAlpha: cssAlpha(0.05 + extraBlurAmount * 0.12),
+    glassDarkShadowAlpha: cssAlpha(0.24 + extraBlurAmount * 0.28),
+    glassDarkSecondaryShadowAlpha: cssAlpha(0.16 + extraBlurAmount * 0.18),
+    glassInnerHighlightAlpha: cssAlpha(0.18 + extraBlurAmount * 0.42),
+    glassDarkInnerHighlightAlpha: cssAlpha(0.1 + extraBlurAmount * 0.2),
+    glassInnerLowlightAlpha: cssAlpha(0.06 + extraBlurAmount * 0.12),
+    glassDarkInnerLowlightAlpha: cssAlpha(0.04 + extraBlurAmount * 0.08),
+  };
+}
+
 function readDottedValue(input: Record<string, unknown>, dottedKey: string): unknown {
   const nestedValue = dottedKey.split(".").reduce<unknown>((current, part) => {
     if (!isRecord(current)) {
@@ -246,6 +433,13 @@ function normalizeThemeConfigOverrides(input: unknown): Partial<ThemeConfig> {
   const statusDesign = pickEnum(input.statusDesign, STATUS_DESIGNS);
   const graphDesign = pickEnum(input.graphDesign, GRAPH_DESIGNS);
   const backgroundImageUrl = pickString(input.backgroundImageUrl);
+  const backgroundBlurEnabled = pickBoolean(input.backgroundBlurEnabled);
+  const backgroundBlurType = pickBlurType(input.backgroundBlurType);
+  const backgroundBlurIntensity = pickNumber(input.backgroundBlurIntensity);
+  const cardBlurEnabled = pickBoolean(input.cardBlurEnabled);
+  const cardBlurType = pickBlurType(input.cardBlurType);
+  const cardBlurIntensity = pickNumber(input.cardBlurIntensity);
+  const cardExtraBlurIntensity = pickNumber(input.cardExtraBlurIntensity);
 
   if (colorTheme) result.colorTheme = colorTheme;
   if (cardLayout) result.cardLayout = cardLayout;
@@ -253,6 +447,19 @@ function normalizeThemeConfigOverrides(input: unknown): Partial<ThemeConfig> {
   if (statusDesign) result.statusDesign = statusDesign;
   if (graphDesign) result.graphDesign = graphDesign;
   if (backgroundImageUrl !== undefined) result.backgroundImageUrl = backgroundImageUrl;
+  if (backgroundBlurEnabled !== undefined) result.backgroundBlurEnabled = backgroundBlurEnabled;
+  if (backgroundBlurType) result.backgroundBlurType = backgroundBlurType;
+  if (backgroundBlurIntensity !== undefined) {
+    result.backgroundBlurIntensity = clampBackgroundBlurIntensity(backgroundBlurIntensity);
+  }
+  if (cardBlurEnabled !== undefined) result.cardBlurEnabled = cardBlurEnabled;
+  if (cardBlurType) result.cardBlurType = cardBlurType;
+  if (cardBlurIntensity !== undefined) {
+    result.cardBlurIntensity = clampBackgroundBlurIntensity(cardBlurIntensity);
+  }
+  if (cardExtraBlurIntensity !== undefined) {
+    result.cardExtraBlurIntensity = clampBackgroundBlurIntensity(cardExtraBlurIntensity);
+  }
 
   return result;
 }
@@ -363,7 +570,23 @@ function mergeManagedSettings(
 ): Record<string, unknown> {
   const next: Record<string, unknown> = { ...(current as Record<string, unknown>) };
 
-  (["colorTheme", "cardLayout", "cardDesign", "statusDesign", "graphDesign", "backgroundImageUrl"] as const).forEach((key) => {
+  (
+    [
+      "colorTheme",
+      "cardLayout",
+      "cardDesign",
+      "statusDesign",
+      "graphDesign",
+      "backgroundImageUrl",
+      "backgroundBlurEnabled",
+      "backgroundBlurType",
+      "backgroundBlurIntensity",
+      "cardBlurEnabled",
+      "cardBlurType",
+      "cardBlurIntensity",
+      "cardExtraBlurIntensity",
+    ] as const
+  ).forEach((key) => {
     if (patch[key] !== undefined) {
       next[key] = patch[key];
     }
@@ -654,15 +877,78 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return;
     }
 
-    if (themeConfig.backgroundImageUrl) {
-      document.body.style.backgroundImage = `url(${themeConfig.backgroundImageUrl})`;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.backgroundPosition = "center";
-      document.body.style.backgroundAttachment = "fixed";
-    } else {
-      document.body.style.backgroundImage = "";
+    document.body.style.backgroundImage = "";
+    document.body.style.backgroundSize = "";
+    document.body.style.backgroundPosition = "";
+    document.body.style.backgroundAttachment = "";
+
+    if (!themeConfig.backgroundImageUrl) {
+      delete document.body.dataset.customBackground;
+      document.body.style.removeProperty("--komari-custom-background-image");
+      document.body.style.removeProperty("--komari-custom-background-filter");
+      document.body.style.removeProperty("--komari-custom-background-inset");
+      document.body.style.removeProperty("--komari-custom-background-bleed");
+      document.body.style.removeProperty("--komari-custom-background-scale");
+      return;
     }
-  }, [themeConfig.backgroundImageUrl]);
+
+    const { filter, bleed } = getBackgroundBlurPresentation(
+      themeConfig.backgroundBlurType,
+      themeConfig.backgroundBlurIntensity,
+      themeConfig.backgroundBlurEnabled
+    );
+
+    document.body.dataset.customBackground = "true";
+    document.body.style.setProperty(
+      "--komari-custom-background-image",
+      `url("${cssString(themeConfig.backgroundImageUrl)}")`
+    );
+    document.body.style.setProperty("--komari-custom-background-filter", filter);
+    document.body.style.setProperty("--komari-custom-background-bleed", bleed);
+    document.body.style.removeProperty("--komari-custom-background-inset");
+    document.body.style.removeProperty("--komari-custom-background-scale");
+  }, [
+    themeConfig.backgroundBlurEnabled,
+    themeConfig.backgroundBlurIntensity,
+    themeConfig.backgroundBlurType,
+    themeConfig.backgroundImageUrl,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!themeConfig.cardBlurEnabled) {
+      delete document.body.dataset.cardBlur;
+      delete document.body.dataset.cardBlurType;
+      Object.values(CARD_BLUR_STYLE_PROPERTIES).forEach((property) => {
+        document.body.style.removeProperty(property);
+      });
+      return;
+    }
+
+    const presentation = getCardBlurPresentation(
+      themeConfig.cardBlurType,
+      themeConfig.cardBlurIntensity,
+      themeConfig.cardExtraBlurIntensity,
+      themeConfig.cardBlurEnabled
+    );
+
+    document.body.dataset.cardBlur = "true";
+    document.body.dataset.cardBlurType = themeConfig.cardBlurType;
+    Object.entries(CARD_BLUR_STYLE_PROPERTIES).forEach(([key, property]) => {
+      document.body.style.setProperty(
+        property,
+        presentation[key as keyof typeof presentation]
+      );
+    });
+  }, [
+    themeConfig.cardBlurEnabled,
+    themeConfig.cardBlurIntensity,
+    themeConfig.cardExtraBlurIntensity,
+    themeConfig.cardBlurType,
+  ]);
 
   const setColorTheme = (theme: ColorTheme) => setLocalThemePatch({ colorTheme: theme });
   const setCardLayout = (layout: CardLayout) => setLocalThemePatch({ cardLayout: layout });
@@ -670,6 +956,17 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const setStatusDesign = (design: StatusDesign) => setLocalThemePatch({ statusDesign: design });
   const setGraphDesign = (design: GraphDesign) => setLocalThemePatch({ graphDesign: design });
   const setBackgroundImageUrl = (url: string) => setLocalThemePatch({ backgroundImageUrl: url });
+  const setBackgroundBlurEnabled = (enabled: boolean) => setLocalThemePatch({ backgroundBlurEnabled: enabled });
+  const setBackgroundBlurType = (type: BackgroundBlurType) => setLocalThemePatch({ backgroundBlurType: type });
+  const setBackgroundBlurIntensity = (intensity: number) =>
+    setLocalThemePatch({ backgroundBlurIntensity: clampBackgroundBlurIntensity(intensity) });
+  const setCardBlurEnabled = (enabled: boolean) => setLocalThemePatch({ cardBlurEnabled: enabled });
+  const setCardBlurType = (type: CardBlurType) => setLocalThemePatch({ cardBlurType: type });
+  const setCardTransparentIntensity = (intensity: number) =>
+    setLocalThemePatch({ cardBlurIntensity: clampBackgroundBlurIntensity(intensity) });
+  const setCardBlurIntensity = setCardTransparentIntensity;
+  const setCardExtraBlurIntensity = (intensity: number) =>
+    setLocalThemePatch({ cardExtraBlurIntensity: clampBackgroundBlurIntensity(intensity) });
   const setStatusCardVisibility = (key: keyof StatusCardsVisibility, checked: boolean) =>
     setLocalStatusCardsPatch({ [key]: checked });
 
@@ -686,6 +983,14 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setStatusDesign,
       setGraphDesign,
       setBackgroundImageUrl,
+      setBackgroundBlurEnabled,
+      setBackgroundBlurType,
+      setBackgroundBlurIntensity,
+      setCardBlurEnabled,
+      setCardBlurType,
+      setCardTransparentIntensity,
+      setCardBlurIntensity,
+      setCardExtraBlurIntensity,
       setStatusCardVisibility,
       setNodeViewMode: setNodeViewModeValue,
     }),

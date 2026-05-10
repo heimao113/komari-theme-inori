@@ -48,6 +48,34 @@
         "default": "default"
       },
       {
+        "key": "cardBlurEnabled",
+        "type": "bool",
+        "label": "Enable card background blur",
+        "default": false
+      },
+      {
+        "key": "cardBlurType",
+        "type": "option",
+        "label": "Card background blur type",
+        "options": [
+          "soft",
+          "glass"
+        ],
+        "default": "glass"
+      },
+      {
+        "key": "cardBlurIntensity",
+        "type": "number",
+        "label": "Card background transparent intensity",
+        "default": 35
+      },
+      {
+        "key": "cardExtraBlurIntensity",
+        "type": "number",
+        "label": "Card background extra blur intensity",
+        "default": 35
+      },
+      {
         "key": "statusDesign",
         "type": "option",
         "label": "Default status design",
@@ -84,6 +112,28 @@
         "type": "text",
         "label": "Background image URL",
         "default": ""
+      },
+      {
+        "key": "backgroundBlurEnabled",
+        "type": "bool",
+        "label": "Enable background blur",
+        "default": false
+      },
+      {
+        "key": "backgroundBlurType",
+        "type": "option",
+        "label": "Background blur type",
+        "options": [
+          "soft",
+          "glass"
+        ],
+        "default": "soft"
+      },
+      {
+        "key": "backgroundBlurIntensity",
+        "type": "number",
+        "label": "Background blur intensity",
+        "default": 35
       },
       {
         "key": "statusCardsVisibility.currentTime",
@@ -162,6 +212,43 @@
         "options": "default,quality-bars"
       },
       {
+        "key": "cardBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用卡片背景模糊",
+          "en-US": "Enable Card Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "cardBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "卡片背景模糊类型",
+          "en-US": "Card Background Blur Type"
+        },
+        "default": "glass",
+        "options": "soft,glass"
+      },
+      {
+        "key": "cardBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景透明强度",
+          "en-US": "Card Background Transparent Intensity"
+        },
+        "default": 35
+      },
+      {
+        "key": "cardExtraBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景额外模糊强度",
+          "en-US": "Card Background Extra Blur Intensity"
+        },
+        "default": 35
+      },
+      {
         "key": "statusDesign",
         "type": "select",
         "name": {
@@ -199,6 +286,34 @@
           "en-US": "Background Image URL"
         },
         "default": ""
+      },
+      {
+        "key": "backgroundBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用背景模糊",
+          "en-US": "Enable Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "backgroundBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "背景模糊类型",
+          "en-US": "Background Blur Type"
+        },
+        "default": "soft",
+        "options": "soft,glass"
+      },
+      {
+        "key": "backgroundBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "背景模糊强度",
+          "en-US": "Background Blur Intensity"
+        },
+        "default": 35
       },
       {
         "type": "title",
@@ -295,6 +410,43 @@
         "options": "default,quality-bars"
       },
       {
+        "key": "cardBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用卡片背景模糊",
+          "en-US": "Enable Card Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "cardBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "卡片背景模糊类型",
+          "en-US": "Card Background Blur Type"
+        },
+        "default": "glass",
+        "options": "soft,glass"
+      },
+      {
+        "key": "cardBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景透明强度",
+          "en-US": "Card Background Transparent Intensity"
+        },
+        "default": 35
+      },
+      {
+        "key": "cardExtraBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景额外模糊强度",
+          "en-US": "Card Background Extra Blur Intensity"
+        },
+        "default": 35
+      },
+      {
         "key": "statusDesign",
         "type": "select",
         "name": {
@@ -332,6 +484,34 @@
           "en-US": "Background Image URL"
         },
         "default": ""
+      },
+      {
+        "key": "backgroundBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用背景模糊",
+          "en-US": "Enable Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "backgroundBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "背景模糊类型",
+          "en-US": "Background Blur Type"
+        },
+        "default": "soft",
+        "options": "soft,glass"
+      },
+      {
+        "key": "backgroundBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "背景模糊强度",
+          "en-US": "Background Blur Intensity"
+        },
+        "default": 35
       },
       {
         "type": "title",
@@ -432,6 +612,43 @@
         "options": "default,quality-bars"
       },
       {
+        "key": "cardBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用卡片背景模糊",
+          "en-US": "Enable Card Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "cardBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "卡片背景模糊类型",
+          "en-US": "Card Background Blur Type"
+        },
+        "default": "glass",
+        "options": "soft,glass"
+      },
+      {
+        "key": "cardBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景透明强度",
+          "en-US": "Card Background Transparent Intensity"
+        },
+        "default": 35
+      },
+      {
+        "key": "cardExtraBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景额外模糊强度",
+          "en-US": "Card Background Extra Blur Intensity"
+        },
+        "default": 35
+      },
+      {
         "key": "statusDesign",
         "type": "select",
         "name": {
@@ -469,6 +686,34 @@
           "en-US": "Background Image URL"
         },
         "default": ""
+      },
+      {
+        "key": "backgroundBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用背景模糊",
+          "en-US": "Enable Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "backgroundBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "背景模糊类型",
+          "en-US": "Background Blur Type"
+        },
+        "default": "soft",
+        "options": "soft,glass"
+      },
+      {
+        "key": "backgroundBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "背景模糊强度",
+          "en-US": "Background Blur Intensity"
+        },
+        "default": 35
       },
       {
         "type": "title",
@@ -569,6 +814,43 @@
         "options": "default,quality-bars"
       },
       {
+        "key": "cardBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用卡片背景模糊",
+          "en-US": "Enable Card Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "cardBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "卡片背景模糊类型",
+          "en-US": "Card Background Blur Type"
+        },
+        "default": "glass",
+        "options": "soft,glass"
+      },
+      {
+        "key": "cardBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景透明强度",
+          "en-US": "Card Background Transparent Intensity"
+        },
+        "default": 35
+      },
+      {
+        "key": "cardExtraBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "卡片背景额外模糊强度",
+          "en-US": "Card Background Extra Blur Intensity"
+        },
+        "default": 35
+      },
+      {
         "key": "statusDesign",
         "type": "select",
         "name": {
@@ -606,6 +888,34 @@
           "en-US": "Background Image URL"
         },
         "default": ""
+      },
+      {
+        "key": "backgroundBlurEnabled",
+        "type": "switch",
+        "name": {
+          "zh-CN": "启用背景模糊",
+          "en-US": "Enable Background Blur"
+        },
+        "default": false
+      },
+      {
+        "key": "backgroundBlurType",
+        "type": "select",
+        "name": {
+          "zh-CN": "背景模糊类型",
+          "en-US": "Background Blur Type"
+        },
+        "default": "soft",
+        "options": "soft,glass"
+      },
+      {
+        "key": "backgroundBlurIntensity",
+        "type": "number",
+        "name": {
+          "zh-CN": "背景模糊强度",
+          "en-US": "Background Blur Intensity"
+        },
+        "default": 35
       },
       {
         "type": "title",

@@ -45,13 +45,73 @@ const resources = {
   },
 };
 
-const i18n = i18next
+const supportedLanguages = Object.keys(resources);
+
+function normalizeLanguage(language: string | null | undefined): string | undefined {
+  if (!language) {
+    return undefined;
+  }
+
+  let decodedLanguage = language;
+  try {
+    decodedLanguage = decodeURIComponent(language);
+  } catch {
+    decodedLanguage = language;
+  }
+  decodedLanguage = decodedLanguage.replace("_", "-");
+  if (supportedLanguages.includes(decodedLanguage)) {
+    return decodedLanguage;
+  }
+
+  const lowerLanguage = decodedLanguage.toLowerCase();
+  const exactMatch = supportedLanguages.find((code) => code.toLowerCase() === lowerLanguage);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  const baseLanguage = lowerLanguage.split("-")[0];
+  if (baseLanguage === "zh") {
+    return "zh-CN";
+  }
+
+  return supportedLanguages.find((code) => code.toLowerCase() === baseLanguage);
+}
+
+export function detectClientLanguage(): string {
+  if (typeof window === "undefined") {
+    return "en";
+  }
+
+  const queryLanguage = new URLSearchParams(window.location.search).get("lng");
+  let localStorageLanguage: string | null = null;
+  try {
+    localStorageLanguage = window.localStorage?.getItem("i18nextLng") || null;
+  } catch {
+    localStorageLanguage = null;
+  }
+  const cookieLanguage = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith("i18next="))
+    ?.split("=")[1];
+  const navigatorLanguage = window.navigator.languages?.[0] || window.navigator.language;
+
+  return (
+    normalizeLanguage(queryLanguage) ||
+    normalizeLanguage(localStorageLanguage) ||
+    normalizeLanguage(cookieLanguage) ||
+    normalizeLanguage(navigatorLanguage) ||
+    "en"
+  );
+}
+
+i18next
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
     fallbackLng: "en",
-    supportedLngs: Object.keys(resources),
+    lng: "en",
+    supportedLngs: supportedLanguages,
     load: "currentOnly",
     interpolation: {
       escapeValue: false, // React handles XSS
@@ -62,5 +122,5 @@ const i18n = i18next
     },
   });
 
-export default i18n;
+export default i18next;
 export { resources };

@@ -11,7 +11,18 @@ import { Toaster } from "@/components/ui/sonner"
 import { OfflineIndicator } from "@/components/OfflineIndicator"
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt"
 import { PWAUpdatePrompt } from "@/components/PWAUpdatePrompt"
-import "@/i18n/config"
+import i18n, { detectClientLanguage } from "@/i18n/config"
+
+function I18nClientLanguageSync() {
+  React.useEffect(() => {
+    const detectedLanguage = detectClientLanguage();
+    if (i18n.language !== detectedLanguage) {
+      void i18n.changeLanguage(detectedLanguage);
+    }
+  }, []);
+
+  return null;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +32,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
+      <I18nClientLanguageSync />
       <ThemeProvider>
         <RPC2Provider>
           <PublicInfoProvider>

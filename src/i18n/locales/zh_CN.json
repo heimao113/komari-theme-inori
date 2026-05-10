@@ -808,8 +808,25 @@
   },
   "themeCustomizer": {
     "apply": "应用",
+    "backgroundBlur": "背景模糊",
+    "backgroundBlurIntensity": "强度",
+    "backgroundBlurType": "模糊类型",
+    "backgroundBlurTypes": {
+      "glass": {
+        "description": "强玻璃质感",
+        "label": "玻璃"
+      },
+      "soft": {
+        "description": "轻微虚化",
+        "label": "轻柔"
+      }
+    },
     "backgroundImage": "背景图片",
     "backgroundImagePlaceholder": "输入图片 URL",
+    "cardBackground": "卡片背景",
+    "cardBlur": "卡片模糊",
+    "cardBlurIntensity": "透明强度",
+    "cardBlurType": "模糊类型",
     "cardDesign": "卡片设计",
     "cardDesigns": {
       "default": {
@@ -821,6 +838,7 @@
         "label": "历史块"
       }
     },
+    "cardExtraBlurIntensity": "额外模糊强度",
     "cardLayout": "卡片布局",
     "cardLayouts": {
       "classic": {

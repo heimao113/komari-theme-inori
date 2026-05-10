@@ -31,6 +31,8 @@ It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI**
   - **4 Graph Designs:** Circle, Progress Bar, Bar Chart, Minimal - all following the selected color theme
   - **Customizable Status Cards:** Show/hide individual metrics on the dashboard
   - **Bring your own background!** Use an image URL to set it as the background.
+  - **Background Blur:** Add soft or glass blur effects to custom background images, with adjustable intensity.
+  - **Card Blur:** Enable soft or glass card backgrounds, tune card transparency, and adjust extra blur separately.
   - **Ping stats display** Show package information at homepage straight away!
   - All settings persist locally and sync across theme changes
 

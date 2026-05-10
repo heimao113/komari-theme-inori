@@ -72,7 +72,6 @@ export async function updateSettings(
       }
     }
   } catch (error) {
-    console.error("Failed to update settings:", error);
     throw error;
   }
 }

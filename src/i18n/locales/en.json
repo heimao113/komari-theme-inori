@@ -656,10 +656,18 @@
     "colorTheme": "Color Theme",
     "cardLayout": "Card Layout",
     "cardDesign": "Card Design",
+    "cardBackground": "Card Background",
+    "cardBlur": "Card Blur",
+    "cardBlurType": "Blur Type",
+    "cardBlurIntensity": "Transparent Intensity",
+    "cardExtraBlurIntensity": "Extra Blur Intensity",
     "statusDesign": "Status Design",
     "graphDesign": "Graph Design",
     "backgroundImage": "Background Image",
     "backgroundImagePlaceholder": "Enter image URL",
+    "backgroundBlur": "Background Blur",
+    "backgroundBlurType": "Blur Type",
+    "backgroundBlurIntensity": "Intensity",
     "apply": "Apply",
     "clear": "Clear",
     "colorThemes": {
@@ -669,6 +677,16 @@
       "forest": "Forest",
       "midnight": "Midnight",
       "rose": "Rose"
+    },
+    "backgroundBlurTypes": {
+      "soft": {
+        "label": "Soft",
+        "description": "Subtle focus"
+      },
+      "glass": {
+        "label": "Glass",
+        "description": "Strong glass"
+      }
     },
     "cardLayouts": {
       "classic": {

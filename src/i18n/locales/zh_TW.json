@@ -656,10 +656,18 @@
     "colorTheme": "顏色主題",
     "cardLayout": "卡片布局",
     "cardDesign": "卡片設計",
+    "cardBackground": "卡片背景",
+    "cardBlur": "卡片模糊",
+    "cardBlurType": "模糊類型",
+    "cardBlurIntensity": "透明強度",
+    "cardExtraBlurIntensity": "額外模糊強度",
     "statusDesign": "狀態設計",
     "graphDesign": "圖表設計",
     "backgroundImage": "背景圖片",
     "backgroundImagePlaceholder": "輸入圖片 URL",
+    "backgroundBlur": "背景模糊",
+    "backgroundBlurType": "模糊類型",
+    "backgroundBlurIntensity": "強度",
     "apply": "套用",
     "clear": "清除",
     "colorThemes": {
@@ -669,6 +677,16 @@
       "forest": "森林",
       "midnight": "午夜",
       "rose": "玫瑰"
+    },
+    "backgroundBlurTypes": {
+      "soft": {
+        "label": "輕柔",
+        "description": "輕微虛化"
+      },
+      "glass": {
+        "label": "玻璃",
+        "description": "強玻璃質感"
+      }
     },
     "cardLayouts": {
       "classic": {

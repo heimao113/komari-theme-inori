@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useTheme, ColorTheme, CardDesign, CardLayout, GraphDesign, StatusDesign } from '@/contexts/ThemeContext';
+import {
+  useTheme,
+  BackgroundBlurType,
+  CardBlurType,
+  ColorTheme,
+  CardDesign,
+  CardLayout,
+  GraphDesign,
+  StatusDesign,
+} from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -28,6 +37,13 @@ const ThemeSwitcher = () => {
     setStatusDesign,
     setGraphDesign,
     setBackgroundImageUrl,
+    setBackgroundBlurEnabled,
+    setBackgroundBlurType,
+    setBackgroundBlurIntensity,
+    setCardBlurEnabled,
+    setCardBlurType,
+    setCardTransparentIntensity,
+    setCardExtraBlurIntensity,
   } = useTheme();
   const { t } = useTranslation();
   const [bgUrlInput, setBgUrlInput] = useState(themeConfig.backgroundImageUrl || '');
@@ -116,6 +132,32 @@ const ThemeSwitcher = () => {
       value: 'minimal',
       label: t('themeCustomizer.graphDesigns.minimal.label', { defaultValue: 'Minimal' }),
       description: t('themeCustomizer.graphDesigns.minimal.description', { defaultValue: 'Simple text' }),
+    },
+  ];
+
+  const backgroundBlurTypes: { value: BackgroundBlurType; label: string; description: string }[] = [
+    {
+      value: 'soft',
+      label: t('themeCustomizer.backgroundBlurTypes.soft.label', { defaultValue: 'Soft' }),
+      description: t('themeCustomizer.backgroundBlurTypes.soft.description', { defaultValue: 'Subtle focus' }),
+    },
+    {
+      value: 'glass',
+      label: t('themeCustomizer.backgroundBlurTypes.glass.label', { defaultValue: 'Glass' }),
+      description: t('themeCustomizer.backgroundBlurTypes.glass.description', { defaultValue: 'Strong glass' }),
+    },
+  ];
+
+  const cardBlurTypes: { value: CardBlurType; label: string; description: string }[] = [
+    {
+      value: 'soft',
+      label: t('themeCustomizer.backgroundBlurTypes.soft.label', { defaultValue: 'Soft' }),
+      description: t('themeCustomizer.backgroundBlurTypes.soft.description', { defaultValue: 'Subtle focus' }),
+    },
+    {
+      value: 'glass',
+      label: t('themeCustomizer.backgroundBlurTypes.glass.label', { defaultValue: 'Glass' }),
+      description: t('themeCustomizer.backgroundBlurTypes.glass.description', { defaultValue: 'Strong glass' }),
     },
   ];
 
@@ -216,6 +258,88 @@ const ThemeSwitcher = () => {
                   )}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="border-t pt-3">
+            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+              <Layout className="h-4 w-4" />
+              {t('themeCustomizer.cardBackground', { defaultValue: 'Card Background' })}
+            </h4>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('themeCustomizer.cardBlur', { defaultValue: 'Card Blur' })}
+                </span>
+                <Switch
+                  checked={themeConfig.cardBlurEnabled}
+                  onCheckedChange={setCardBlurEnabled}
+                />
+              </div>
+              {themeConfig.cardBlurEnabled && (
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <div className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                      {t('themeCustomizer.cardBlurType', { defaultValue: 'Blur Type' })}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {cardBlurTypes.map((type) => (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() => setCardBlurType(type.value)}
+                          className={`rounded-md border p-2 text-left transition-all ${
+                            themeConfig.cardBlurType === type.value
+                              ? 'border-primary bg-primary/10'
+                              : 'border-transparent hover:bg-accent'
+                          }`}
+                        >
+                          <div className="text-[11px] font-medium leading-tight">{type.label}</div>
+                          <div className="text-[10px] leading-tight text-muted-foreground">{type.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        {t('themeCustomizer.cardBlurIntensity', { defaultValue: 'Transparent Intensity' })}
+                      </span>
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        {themeConfig.cardBlurIntensity}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={themeConfig.cardBlurIntensity}
+                      onChange={(event) => setCardTransparentIntensity(Number(event.target.value))}
+                      className="h-2 w-full cursor-pointer accent-primary"
+                    />
+                  </div>
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        {t('themeCustomizer.cardExtraBlurIntensity', { defaultValue: 'Extra Blur Intensity' })}
+                      </span>
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        {themeConfig.cardExtraBlurIntensity}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={themeConfig.cardExtraBlurIntensity}
+                      onChange={(event) => setCardExtraBlurIntensity(Number(event.target.value))}
+                      className="h-2 w-full cursor-pointer accent-primary"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -366,6 +490,60 @@ const ThemeSwitcher = () => {
                   {t('themeCustomizer.clear', { defaultValue: 'Clear' })}
                 </Button>
               </div>
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t('themeCustomizer.backgroundBlur', { defaultValue: 'Background Blur' })}
+                </span>
+                <Switch
+                  checked={themeConfig.backgroundBlurEnabled}
+                  onCheckedChange={setBackgroundBlurEnabled}
+                />
+              </div>
+              {themeConfig.backgroundBlurEnabled && (
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <div className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                      {t('themeCustomizer.backgroundBlurType', { defaultValue: 'Blur Type' })}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {backgroundBlurTypes.map((type) => (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() => setBackgroundBlurType(type.value)}
+                          className={`rounded-md border p-2 text-left transition-all ${
+                            themeConfig.backgroundBlurType === type.value
+                              ? 'border-primary bg-primary/10'
+                              : 'border-transparent hover:bg-accent'
+                          }`}
+                        >
+                          <div className="text-[11px] font-medium leading-tight">{type.label}</div>
+                          <div className="text-[10px] leading-tight text-muted-foreground">{type.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-muted-foreground">
+                        {t('themeCustomizer.backgroundBlurIntensity', { defaultValue: 'Intensity' })}
+                      </span>
+                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                        {themeConfig.backgroundBlurIntensity}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={themeConfig.backgroundBlurIntensity}
+                      onChange={(event) => setBackgroundBlurIntensity(Number(event.target.value))}
+                      className="h-2 w-full cursor-pointer accent-primary"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
