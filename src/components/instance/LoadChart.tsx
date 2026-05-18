@@ -43,13 +43,13 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const [error, setError] = useState<string | null>(null);
 
   const presetViews = [
-    { label: t("chart.hours", { count: 4 }), hours: 4 },
-    { label: t("chart.days", { count: 1 }), hours: 24 },
-    { label: t("chart.days", { count: 7 }), hours: 168 },
-    { label: t("chart.days", { count: 30 }), hours: 720 },
+    { label: t("chart.hours", { count: 4 }), value: "hours-4", hours: 4 },
+    { label: t("chart.days", { count: 1 }), value: "hours-24", hours: 24 },
+    { label: t("chart.days", { count: 7 }), value: "hours-168", hours: 168 },
+    { label: t("chart.days", { count: 30 }), value: "hours-720", hours: 720 },
   ];
-  const avaliableView: { label: string; hours?: number }[] = [
-    { label: t("common.real_time") },
+  const avaliableView: { label: string; value: string; hours?: number }[] = [
+    { label: t("common.real_time"), value: "real-time" },
   ];
   
   if (
@@ -58,7 +58,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   ) {
     for (const v of presetViews) {
       if (max_record_preserve_time >= v.hours) {
-        avaliableView.push({ label: v.label, hours: v.hours });
+        avaliableView.push({ label: v.label, value: v.value, hours: v.hours });
       }
     }
     const maxPreset = presetViews[presetViews.length - 1];
@@ -71,6 +71,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
           : `${t("chart.hours", { count: max_record_preserve_time })}`;
       avaliableView.push({
         label: dynamicLabel,
+        value: `hours-${max_record_preserve_time}`,
         hours: max_record_preserve_time,
       });
     } else if (
@@ -85,6 +86,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
           : `${t("chart.hours", { count: max_record_preserve_time })}`;
       avaliableView.push({
         label: dynamicLabel,
+        value: `hours-${max_record_preserve_time}`,
         hours: max_record_preserve_time,
       });
     }
@@ -92,12 +94,12 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
 
   useEffect(() => {
     if (avaliableView.length > 0) {
-      setHoursView(avaliableView[0].label);
+      setHoursView(avaliableView[0].value);
     }
   }, [max_record_preserve_time]);
 
   useEffect(() => {
-    const selected = avaliableView.find((v) => v.label === hoursView);
+    const selected = avaliableView.find((v) => v.value === hoursView);
     if (!uuid) return;
     if (!selected || !selected.hours) {
       setRemoteData(null);
@@ -171,9 +173,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const timeFormatter = (value: any, index: number) => {
     if (index === 0 || index === chartData.length - 1) {
       if (
-        presetViews[0].label === hoursView ||
-        hoursView === "real-time" ||
-        hoursView === t("common.real_time")
+        presetViews[0].value === hoursView ||
+        hoursView === "real-time"
       ) {
         return new Date(value).toLocaleTimeString([], {
           hour: "2-digit",
@@ -190,7 +191,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const node = nodeList?.find((n) => n.uuid === uuid);
   const lableFormatter = (value: any) => {
     const date = new Date(value);
-    if (hoursView === t("common.real_time") || hoursView === "real-time") {
+    if (hoursView === "real-time") {
       return date.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -222,20 +223,19 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const minute = 60;
   const hour = minute * 60;
   const MAX_REALTIME_POINTS = 30 * 5;
-  const isRealtime =
-    hoursView === t("common.real_time") || hoursView === "real-time";
+  const isRealtime = hoursView === "real-time";
   const realtimeData = Array.isArray(data)
     ? data.slice(-MAX_REALTIME_POINTS)
     : data;
 
   const chartData = isRealtime
     ? realtimeData
-    : hoursView === presetViews[0].label
+    : hoursView === presetViews[0].value
     ? fillMissingTimePoints(remoteData ?? [], minute, hour * 4, minute * 2)
     : (() => {
         const selectedHours =
-          presetViews.find((v) => v.label === hoursView)?.hours ||
-          avaliableView.find((v) => v.label === hoursView)?.hours ||
+          presetViews.find((v) => v.value === hoursView)?.hours ||
+          avaliableView.find((v) => v.value === hoursView)?.hours ||
           24;
         const interval = selectedHours > 120 ? hour : minute * 15;
         const maxGap = interval * 2;
@@ -253,8 +253,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
         <div className="w-max mx-auto">
           <SegmentedControl value={hoursView} onValueChange={setHoursView}>
             {avaliableView.map((view) => (
-              <SegmentedControlItem key={view.label}
-                value={view.label}
+              <SegmentedControlItem key={view.value}
+                value={view.value}
                 className="capitalize"
               >
                 {view.label}
