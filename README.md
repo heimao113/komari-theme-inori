@@ -164,6 +164,7 @@ If you find issues or have ideas for improvements, feel free to open an issue or
 ## Thanks
 [piphase/komari-nexus](https://github.com/piphase/komari-nexus)
 [fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro)
+[Contributors](https://github.com/tonyliuzj/komari-next/graphs/contributors)
 
 ## Star History
 
