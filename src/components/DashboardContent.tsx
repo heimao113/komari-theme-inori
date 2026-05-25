@@ -250,7 +250,7 @@ export default function DashboardContent() {
       refresh();
     }, 5000);
     return () => clearInterval(interval);
-  }, [nodeList, refresh]);
+  }, [refresh]);
 
   if (isLoading) {
     return <Loading />;

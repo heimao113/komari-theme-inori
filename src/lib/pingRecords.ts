@@ -1,0 +1,125 @@
+export interface PingRecord {
+  client: string;
+  task_id: number;
+  time: string;
+  value: number;
+}
+
+export interface PingTaskInfo {
+  id: number;
+  name: string;
+  interval: number;
+  loss: number;
+  value?: number;
+  p99?: number;
+  p50?: number;
+  p99_p50_ratio?: number;
+  min?: number;
+  max?: number;
+  avg?: number;
+  latest?: number;
+  total?: number;
+  type?: string;
+}
+
+export interface PingRecordsResponse {
+  count: number;
+  records: PingRecord[];
+  tasks: PingTaskInfo[];
+  from?: string;
+  to?: string;
+}
+
+type RPC2Call = <TParams = any, TResult = any>(
+  method: string,
+  params?: TParams,
+  options?: any
+) => Promise<TResult>;
+
+type PingRecordsCacheEntry = {
+  expiresAt: number;
+  data?: PingRecordsResponse;
+  promise?: Promise<PingRecordsResponse>;
+};
+
+const PING_RECORDS_CACHE_TTL_MS = 60_000;
+const pingRecordsCache = new Map<string, PingRecordsCacheEntry>();
+
+const emptyPingRecordsResponse: PingRecordsResponse = {
+  count: 0,
+  records: [],
+  tasks: [],
+};
+
+function normalizeUuid(uuid: string | null | undefined): string {
+  return typeof uuid === "string" ? uuid.trim() : "";
+}
+
+function normalizeHours(hours: number): number {
+  return Number.isFinite(hours) && hours > 0 ? hours : 0;
+}
+
+function getCacheKey(uuid: string, hours: number): string {
+  return `${uuid}:${hours}`;
+}
+
+function normalizeResponse(result: Partial<PingRecordsResponse> | null | undefined): PingRecordsResponse {
+  const records = [...(result?.records || [])].sort(
+    (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+  );
+
+  return {
+    count: result?.count ?? records.length,
+    records,
+    tasks: result?.tasks || [],
+    from: result?.from,
+    to: result?.to,
+  };
+}
+
+export async function fetchPingRecords(
+  call: RPC2Call,
+  uuid: string | null | undefined,
+  hours: number
+): Promise<PingRecordsResponse> {
+  const normalizedUuid = normalizeUuid(uuid);
+  const normalizedHours = normalizeHours(hours);
+
+  if (!normalizedUuid || !normalizedHours) {
+    return emptyPingRecordsResponse;
+  }
+
+  const now = Date.now();
+  const cacheKey = getCacheKey(normalizedUuid, normalizedHours);
+  const cached = pingRecordsCache.get(cacheKey);
+
+  if (cached && cached.expiresAt > now) {
+    if (cached.data) return cached.data;
+    if (cached.promise) return cached.promise;
+  }
+
+  const promise = call<any, PingRecordsResponse>("common:getRecords", {
+    uuid: normalizedUuid,
+    type: "ping",
+    hours: normalizedHours,
+  })
+    .then((result) => {
+      const data = normalizeResponse(result);
+      pingRecordsCache.set(cacheKey, {
+        data,
+        expiresAt: Date.now() + PING_RECORDS_CACHE_TTL_MS,
+      });
+      return data;
+    })
+    .catch((error) => {
+      pingRecordsCache.delete(cacheKey);
+      throw error;
+    });
+
+  pingRecordsCache.set(cacheKey, {
+    promise,
+    expiresAt: now + PING_RECORDS_CACHE_TTL_MS,
+  });
+
+  return promise;
+}

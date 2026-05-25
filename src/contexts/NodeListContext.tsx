@@ -112,7 +112,7 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = React.useState<string | null>(null);
   const { call } = useRPC2Call();
 
-  const refresh = () => {
+  const refresh = React.useCallback(() => {
     // setIsLoading(true);
     setError(null);
     // 通过 RPC2 获取节点基本信息
@@ -162,13 +162,19 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [call]);
 
   React.useEffect(() => {
     refresh();
-  }, []);
+  }, [refresh]);
+
+  const contextValue = React.useMemo(
+    () => ({ nodeList, isLoading, error, refresh }),
+    [nodeList, isLoading, error, refresh]
+  );
+
   return (
-    <NodeListContext.Provider value={{ nodeList, isLoading, error, refresh }}>
+    <NodeListContext.Provider value={contextValue}>
       {children}
     </NodeListContext.Provider>
   );

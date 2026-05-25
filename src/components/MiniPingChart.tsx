@@ -13,22 +13,7 @@ import { useTranslation } from "react-i18next";
 import { cutPeakValues, interpolateNullsLinear } from "@/utils/RecordHelper";
 import Tips from "./ui/tips";
 import { useRPC2Call } from "@/contexts/RPC2Context";
-
-interface PingRecord {
-  client: string;
-  task_id: number;
-  time: string;
-  value: number;
-}
-interface TaskInfo {
-  id: number;
-  name: string;
-  interval: number;
-  loss: number;
-  p99?: number;
-  p50?: number;
-  p99_p50_ratio?: number;
-}
+import { fetchPingRecords, type PingRecord, type PingTaskInfo } from "@/lib/pingRecords";
 // 移除旧 REST 类型，改用 RPC2 返回结构
 
 //const MAX_POINTS = 1000;
@@ -57,7 +42,7 @@ const MiniPingChart = ({
   hours = 12,
 }: MiniPingChartProps) => {
   const [remoteData, setRemoteData] = useState<PingRecord[] | null>(null);
-  const [tasks, setTasks] = useState<TaskInfo[]>([]);
+  const [tasks, setTasks] = useState<PingTaskInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hiddenLines, setHiddenLines] = useState<Record<string, boolean>>({});
@@ -65,25 +50,34 @@ const MiniPingChart = ({
   const [cutPeak, setCutPeak] = useState(false);
   const { call } = useRPC2Call();
   useEffect(() => {
-    if (!uuid) return;
+    if (!uuid.trim()) {
+      setRemoteData(null);
+      setTasks([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
 
+    let active = true;
     setLoading(true);
     setError(null);
     (async () => {
       try {
-        type RpcResp = { count: number; records: PingRecord[]; tasks?: TaskInfo[] };
-        const result = await call<any, RpcResp>("common:getRecords", { uuid, type: "ping", hours });
-        const records = result?.records || [];
-        records.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-        setRemoteData(records);
+        const result = await fetchPingRecords(call, uuid, hours);
+        if (!active) return;
+        setRemoteData(result.records);
         setTasks(result?.tasks || []);
         setLoading(false);
       } catch (err: any) {
+        if (!active) return;
         setError(err?.message || "Error");
         setLoading(false);
       }
     })();
-  }, [uuid, hours]);
+    return () => {
+      active = false;
+    };
+  }, [uuid, hours, call]);
 
   const chartData = useMemo(() => {
     // 思路：仅保留真实采样时间点（各任务原始时间点的并集），
