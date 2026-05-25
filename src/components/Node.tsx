@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { LiveData, Record } from "../types/LiveData";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { getOSImage, getOSName } from "@/utils";
 import { formatBytes } from "@/utils/unitHelper";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -228,9 +227,9 @@ interface NodeProps {
 
 const Node = ({ basic, live, online }: NodeProps) => {
   const [t] = useTranslation();
-  const isMobile = useIsMobile();
   const { themeConfig } = useTheme();
-  const pingStats = usePingStats(basic.uuid, 24);
+  const [pingStatsEnabled, setPingStatsEnabled] = React.useState(false);
+  const pingStats = usePingStats(basic.uuid, 24, pingStatsEnabled);
 
   const defaultLive = {
     cpu: { usage: 0 },
@@ -301,6 +300,8 @@ const Node = ({ basic, live, online }: NodeProps) => {
     <Card
       id={basic.uuid}
       className={cardStyles[themeConfig.cardLayout] || cardStyles.classic}
+      onMouseEnter={() => setPingStatsEnabled(true)}
+      onFocusCapture={() => setPingStatsEnabled(true)}
     >
       {/* Header: Identity & Status */}
       <CardHeader className={headerStyles[themeConfig.cardLayout] || headerStyles.classic}>

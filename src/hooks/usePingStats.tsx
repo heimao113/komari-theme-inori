@@ -68,11 +68,16 @@ function buildPingHistory(records: PingRecord[]): PingHistoryPoint[] {
   });
 }
 
-export function usePingStats(uuid: string, hours: number = 24): PingStats {
+export function usePingStats(uuid: string, hours: number = 24, enabled: boolean = true): PingStats {
   const { call } = useRPC2Call();
   const [stats, setStats] = useState<PingStats>(() => createEmptyStats());
 
   useEffect(() => {
+    if (!enabled) {
+      setStats(createEmptyStats());
+      return;
+    }
+
     if (!uuid.trim()) {
       setStats(createEmptyStats());
       return;
@@ -132,7 +137,7 @@ export function usePingStats(uuid: string, hours: number = 24): PingStats {
     return () => {
       active = false;
     };
-  }, [uuid, hours, call]);
+  }, [uuid, hours, enabled, call]);
 
   return stats;
 }
