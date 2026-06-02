@@ -430,8 +430,8 @@ const NodeTable: React.FC<NodeTableProps> = ({ nodes, liveData }) => {
                           </div>
                           <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
                             <div
-                              className="h-full rounded-full bg-primary/70 transition-[width] duration-500"
-                              style={{ width: `${trafficBarWidth}%` }}
+                              className="h-full rounded-full bg-primary/70 transition-transform duration-500 origin-left"
+                              style={{ transform: `scaleX(${trafficBarWidth / 100})` }}
                             />
                           </div>
                           <div className="truncate text-[10px] leading-none text-muted-foreground">

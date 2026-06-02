@@ -126,8 +126,8 @@ export default function AdaptiveChart({ value, label, subLabel, color, compact =
           <div className="h-[40px] w-[30px] flex flex-col justify-end items-center">
             <div className="w-full flex flex-col justify-end items-center h-full relative">
               <div
-                className={`w-full rounded-t-lg transition-all duration-500 ${getBarColorClass(visualValue)}`}
-                style={{ height: `${visualValue}%` }}
+                className={`w-full rounded-t-lg transition-transform duration-500 origin-bottom ${getBarColorClass(visualValue)}`}
+                style={{ transform: `scaleY(${visualValue / 100})`, height: '100%' }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <span className={`text-[9px] font-bold drop-shadow-lg ${
@@ -147,8 +147,8 @@ export default function AdaptiveChart({ value, label, subLabel, color, compact =
         <div className="h-[90px] w-[60px] flex flex-col justify-end items-center">
           <div className="w-full flex flex-col justify-end items-center h-full relative">
             <div
-              className={`w-full rounded-t-lg transition-all duration-500 ${getBarColorClass(visualValue)}`}
-              style={{ height: `${visualValue}%` }}
+              className={`w-full rounded-t-lg transition-transform duration-500 origin-bottom ${getBarColorClass(visualValue)}`}
+              style={{ transform: `scaleY(${visualValue / 100})`, height: '100%' }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className={`text-xs font-bold drop-shadow-lg ${

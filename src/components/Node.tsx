@@ -466,8 +466,8 @@ const Node = ({ basic, live, online, pingStatsEnabled = false }: NodeProps) => {
                </div>
                <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
                  <div 
-                   className="h-full bg-primary/70 rounded-full"
-                   style={{ width: `${Math.min(trafficPercentage, 100)}%` }}
+                   className="h-full bg-primary/70 rounded-full transition-transform duration-500 origin-left"
+                   style={{ transform: `scaleX(${Math.min(trafficPercentage, 100) / 100})` }}
                  />
                </div>
                <div className="mt-1 flex justify-end text-[10px] font-mono text-muted-foreground">
