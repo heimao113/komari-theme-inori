@@ -14,17 +14,24 @@ export interface PingStats {
   avgVolatility: number;
   history: PingHistoryPoint[];
   hasData: boolean;
+  isLoaded: boolean;
+  isLoading: boolean;
 }
 
 const HISTORY_BUCKET_COUNT = 28;
 
-function createEmptyStats(): PingStats {
+function createEmptyStats({
+  isLoaded = false,
+  isLoading = false,
+}: { isLoaded?: boolean; isLoading?: boolean } = {}): PingStats {
   return {
     avgLatency: 0,
     avgLoss: 0,
     avgVolatility: 0,
     history: [],
     hasData: false,
+    isLoaded,
+    isLoading,
   };
 }
 
@@ -78,7 +85,7 @@ export function usePingStats(uuid: string, hours: number = 24, enabled: boolean 
     }
 
     if (!uuid.trim()) {
-      setStats(createEmptyStats());
+      setStats(createEmptyStats({ isLoaded: true }));
       return;
     }
 
@@ -88,6 +95,10 @@ export function usePingStats(uuid: string, hours: number = 24, enabled: boolean 
 
     const fetchStats = async (forceRefresh = false) => {
       try {
+        if (!hasReceivedResponse) {
+          setStats((previous) => ({ ...previous, isLoading: true }));
+        }
+
         const result = await fetchPingRecords(call, uuid, hours, { forceRefresh });
         if (!active) return;
 
@@ -96,7 +107,7 @@ export function usePingStats(uuid: string, hours: number = 24, enabled: boolean 
         const tasks = result?.tasks || [];
 
         if (records.length === 0 || tasks.length === 0) {
-          setStats(createEmptyStats());
+          setStats(createEmptyStats({ isLoaded: true }));
           return;
         }
 
@@ -127,11 +138,13 @@ export function usePingStats(uuid: string, hours: number = 24, enabled: boolean 
           avgVolatility,
           history,
           hasData: true,
+          isLoaded: true,
+          isLoading: false,
         });
       } catch {
         if (!active) return;
         if (!hasReceivedResponse) {
-          setStats(createEmptyStats());
+          setStats(createEmptyStats({ isLoaded: true }));
         }
       }
     };

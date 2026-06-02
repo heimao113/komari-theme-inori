@@ -565,7 +565,9 @@ const PingChart = ({ uuid }: { uuid: string }) => {
                       name={task.name}
                       stroke={colors[idx % colors.length]}
                       dot={false}
-                      isAnimationActive={false}
+                      isAnimationActive
+                      animationDuration={500}
+                      animationEasing="ease-out"
                       strokeWidth={2}
                       connectNulls={connect}
                       type={cutPeak ? "basis" : "linear"}

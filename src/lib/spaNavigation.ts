@@ -10,7 +10,10 @@ export function getCurrentSpaPathname(): string {
   return window.location.pathname || "/";
 }
 
-export function navigateSpa(href: string, options: { replace?: boolean } = {}) {
+export function navigateSpa(
+  href: string,
+  options: { replace?: boolean; scrollToTop?: boolean } = {}
+) {
   if (typeof window === "undefined") {
     return;
   }
@@ -25,7 +28,9 @@ export function navigateSpa(href: string, options: { replace?: boolean } = {}) {
   const nextUrl = `${url.pathname}${url.search}${url.hash}`;
   const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
-  if (nextUrl !== currentUrl) {
+  const didNavigate = nextUrl !== currentUrl;
+
+  if (didNavigate) {
     if (options.replace) {
       window.history.replaceState(window.history.state, "", nextUrl);
     } else {
@@ -34,6 +39,12 @@ export function navigateSpa(href: string, options: { replace?: boolean } = {}) {
   }
 
   window.dispatchEvent(new Event(SPA_NAVIGATION_EVENT));
+
+  if (didNavigate && options.scrollToTop !== false && !url.hash) {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    });
+  }
 }
 
 export function isPlainLeftClick(event: MouseEvent<HTMLElement>) {

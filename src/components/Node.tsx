@@ -85,6 +85,15 @@ export function formatTrafficPercentage(value: number): string {
 
 type QualityTone = "good" | "warn" | "bad";
 
+const PING_HISTORY_PLACEHOLDER_POINTS: PingHistoryPoint[] = Array.from(
+  { length: 28 },
+  (_, index) => ({
+    time: `placeholder-${index}`,
+    latency: null,
+    loss: null,
+  })
+);
+
 const qualityToneStyles: {
   [tone in QualityTone]: { bar: string };
 } = {
@@ -178,37 +187,39 @@ function PingHistoryStrip({
 }
 
 function PingQualityBars({ pingStats, t }: { pingStats: PingStats; t: TFunction }) {
-  if (!pingStats.hasData) {
-    return (
-      <div className="flex justify-between items-center">
-        <span className="text-muted-foreground">{t("nodeCard.pingStats")}</span>
-        <span className="text-xs text-muted-foreground/70 italic">{t("nodeCard.noPingData")}</span>
-      </div>
-    );
-  }
-
-  const historyPoints = pingStats.history.length > 0
+  const historyPoints = pingStats.hasData && pingStats.history.length > 0
     ? pingStats.history
-    : [{ time: new Date().toISOString(), latency: null, loss: null }];
+    : PING_HISTORY_PLACEHOLDER_POINTS;
+  const statusText = pingStats.hasData
+    ? `${pingStats.avgVolatility.toFixed(1)} ${t("chart.volatility")}`
+    : pingStats.isLoaded
+      ? t("nodeCard.noPingData")
+      : "--";
+  const latencyValue = pingStats.hasData
+    ? `${Math.round(pingStats.avgLatency)} ms`
+    : "-- ms";
+  const lossValue = pingStats.hasData
+    ? `${pingStats.avgLoss.toFixed(1)}%`
+    : "--%";
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <span className="text-muted-foreground">{t("nodeCard.pingStats")}</span>
         <span className="font-mono text-[11px] text-muted-foreground">
-          {pingStats.avgVolatility.toFixed(1)} {t("chart.volatility")}
+          {statusText}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <PingHistoryStrip
           label={t("nodeCard.latency", { defaultValue: "Latency" })}
-          value={`${Math.round(pingStats.avgLatency)} ms`}
+          value={latencyValue}
           points={historyPoints}
           metric="latency"
         />
         <PingHistoryStrip
           label={t("chart.lossRate", { defaultValue: "Loss" })}
-          value={`${pingStats.avgLoss.toFixed(1)}%`}
+          value={lossValue}
           points={historyPoints}
           metric="loss"
         />
@@ -429,6 +440,11 @@ const Node = ({ basic, live, online, pingStatsEnabled = false }: NodeProps) => {
                 <div className="flex gap-3 font-mono text-xs text-muted-foreground">
                   <span>{pingStats.avgLoss.toFixed(1)}% {t("chart.lossRate")}</span>
                   <span>{pingStats.avgVolatility.toFixed(1)} {t("chart.volatility")}</span>
+                </div>
+              ) : !pingStats.isLoaded ? (
+                <div className="flex gap-3 font-mono text-xs text-muted-foreground/70">
+                  <span>--% {t("chart.lossRate")}</span>
+                  <span>-- {t("chart.volatility")}</span>
                 </div>
               ) : (
                 <span className="text-xs text-muted-foreground/70 italic">{t("nodeCard.noPingData")}</span>
