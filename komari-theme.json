@@ -98,6 +98,12 @@
                 "default": "circle"
             },
             {
+                "key": "showRamDiskTotal",
+                "type": "bool",
+                "label": "Show total RAM and disk space",
+                "default": false
+            },
+            {
                 "key": "nodeViewMode",
                 "type": "option",
                 "label": "Default node view",

@@ -459,6 +459,21 @@ const ThemeSwitcher = () => {
           </div>
 
           <div className="border-t pt-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('themeCustomizer.showRamDiskTotal', { defaultValue: 'Show Total RAM/Disk' })}
+              </span>
+              <Switch
+                checked={themeConfig.showRamDiskTotal}
+                onCheckedChange={(checked) => setShowRamDiskTotal(checked)}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {t('themeCustomizer.showRamDiskTotalDescription', { defaultValue: 'Display used / total for RAM and Disk.' })}
+            </p>
+          </div>
+
+          <div className="border-t pt-3">
             <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Image className="h-4 w-4" />
               {t('themeCustomizer.backgroundImage', { defaultValue: 'Background Image' })}
