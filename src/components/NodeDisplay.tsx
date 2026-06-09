@@ -9,6 +9,7 @@ import { NodeGrid } from "./Node";
 const NodeTable = React.lazy(() => import("./NodeTable"));
 import { isRegionMatch } from "@/utils/regionHelper";
 import "./NodeDisplay.css";
+import { useTheme } from "@/contexts/ThemeContext";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
     "all"
   );
   const searchRef = useRef<HTMLInputElement>(null);
+  const { isThemeLoaded } = useTheme();
 
   // 获取所有的分组
   const groups = useMemo(() => {
@@ -233,7 +235,9 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
       ) : (
         <>
           {viewMode === "grid" ? (
-            <NodeGrid nodes={filteredNodes} liveData={liveData} />
+            isThemeLoaded
+              ? <NodeGrid nodes={filteredNodes} liveData={liveData} />
+              : <div className="py-4 w-full min-h-[200px]" />
           ) : (
             <Suspense
               fallback={<div className="p-4 text-center">Loading table...</div>}
